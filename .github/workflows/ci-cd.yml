@@ -1,4 +1,4 @@
-name: 🚀 Enterprise CI/CD Pipeline (Spring Boot + Angular + Docker + Security)
+name: Enterprise CI/CD Pipeline (Spring Boot + Angular + Docker + Security)
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
   # JOB 1: Backend CI & Unit/Integration Testing
   # ============================================================================
   backend-ci:
-    name: ☕ Backend Build & Test (Spring Boot)
+    name: Backend Build & Test (Spring Boot)
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +46,7 @@ jobs:
   # JOB 2: Frontend CI & Build Verification
   # ============================================================================
   frontend-ci:
-    name: 🅰️ Frontend Build & Test (Angular)
+    name: Frontend Build & Test (Angular)
     runs-on: ubuntu-latest
 
     steps:
@@ -72,7 +72,7 @@ jobs:
   # JOB 3: Security Scanning (SAST, SCA & Secret Leak Detection)
   # ============================================================================
   security-scan:
-    name: 🛡️ Security Scans (SAST, SCA & Secret Leak)
+    name: Security Scans (SAST, SCA & Secret Leak)
     runs-on: ubuntu-latest
     needs: [backend-ci, frontend-ci]
     permissions:
@@ -96,7 +96,7 @@ jobs:
         working-directory: ./Backend
         run: mvn -B -q dependency:resolve -Dmaven.wagon.http.retryHandler.count=5 || true
 
-      - name: 🔍 Secret Scanning (Trufflehog)
+      - name: Secret Scanning (Trufflehog)
         if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.before != github.sha && github.event.before != '0000000000000000000000000000000000000000')
         uses: trufflesecurity/trufflehog@main
         with:
@@ -106,7 +106,7 @@ jobs:
           extra_args: --only-verified
         continue-on-error: true
 
-      - name: 🛡️ SAST & SCA Vulnerability Scan (Trivy)
+      - name: SAST & SCA Vulnerability Scan (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -125,7 +125,7 @@ jobs:
   # JOB 4: Build & Push OCI Docker Images to GHCR
   # ============================================================================
   build-and-push:
-    name: 🐳 Docker Build & Push (GHCR)
+    name: Docker Build & Push (GHCR)
     runs-on: ubuntu-latest
     needs: [security-scan]
     permissions:
@@ -190,7 +190,7 @@ jobs:
   # JOB 5: Deploy to Staging & Run DAST (OWASP ZAP)
   # ============================================================================
   deploy-staging:
-    name: 🧪 Staging Deployment & DAST Scan
+    name: Staging Deployment & DAST Scan
     runs-on: ubuntu-latest
     needs: [build-and-push]
     environment: staging
@@ -199,6 +199,7 @@ jobs:
       packages: read
       issues: write
       pull-requests: write
+      actions: write
 
     services:
       postgres:
@@ -240,6 +241,11 @@ jobs:
           max_attempts=30
           attempt=1
           until curl -f http://localhost:8080/actuator/health || [ $attempt -eq $max_attempts ]; do
+            if ! docker ps --format '{{.Names}}' | grep -q '^backend$'; then
+              echo "Backend container stopped unexpectedly"
+              docker logs backend
+              exit 1
+            fi
             echo "Waiting for backend service... (attempt $attempt/$max_attempts)"
             sleep 2
             ((attempt++))
@@ -250,18 +256,19 @@ jobs:
             exit 1
           fi
 
-      - name: ⚡ DAST Security Scan (OWASP ZAP Baseline)
+      - name: DAST Security Scan (OWASP ZAP Baseline)
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:8080/actuator/health'
           fail_action: false
           token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: zap-scan-results
 
   # ============================================================================
   # JOB 6: Production Blue-Green Deployment with Auto-Rollback
   # ============================================================================
   deploy-production:
-    name: 🌟 Production Blue-Green Zero-Downtime Deployment
+    name: Production Blue-Green Zero-Downtime Deployment
     runs-on: ubuntu-latest
     needs: [deploy-staging]
     environment: production
