@@ -253,6 +253,7 @@ jobs:
         with:
           target: 'http://localhost:8080/actuator/health'
           fail_action: false
+          allow_issue_writing: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
   # ============================================================================
