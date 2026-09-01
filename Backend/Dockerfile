@@ -7,7 +7,7 @@ WORKDIR /build
 
 # Cache dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:resolve -B || true
 
 # Copy source and build package
 COPY src ./src
