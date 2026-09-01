@@ -62,7 +62,7 @@ jobs:
 
       - name: Install NPM Dependencies
         working-directory: ./Frontend
-        run: npm ci
+        run: npm install
 
       - name: Angular Production Build
         working-directory: ./Frontend
