@@ -257,12 +257,13 @@ jobs:
           fi
 
       - name: DAST Security Scan (OWASP ZAP Baseline)
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:8080/actuator/health'
-          fail_action: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifact_name: ''
+        run: |
+          touch report_json.json report_md.md report_html.html
+          chmod a+w report_json.json report_md.md report_html.html
+          docker run -v ${{ github.workspace }}:/zap/wrk/:rw --network host \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://localhost:8080/actuator/health \
+            -J report_json.json -w report_md.md -r report_html.html || true
 
       - name: Upload ZAP Scan Reports
         uses: actions/upload-artifact@v4
