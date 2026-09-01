@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "devops-engineer": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/devops-engineer/SKILL.md",
+      "computedHash": "843a76090e22b577181bbdcd041046c0efdab3fa8e3d2c0264ce3330c97dee02"
+    },
+    "docker-patterns": {
+      "source": "affaan-m/ecc",
+      "sourceType": "github",
+      "skillPath": "skills/docker-patterns/SKILL.md",
+      "computedHash": "af6deba271429bcb5198a7e56a4f71f948509e06037e6a3210d0ad5f516eeb29"
+    },
+    "github-actions-templates": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/cicd-automation/skills/github-actions-templates/SKILL.md",
+      "computedHash": "d57f2a45525180e30d9130aeab1613930c274917c5002899d8c37185594de411"
+    },
+    "multi-stage-dockerfile": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/multi-stage-dockerfile/SKILL.md",
+      "computedHash": "698bf93a84dae18fd7bd0b1d35c21427307fde78fbdf4624be9726f5f98189ca"
+    },
+    "prometheus-configuration": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/observability-monitoring/skills/prometheus-configuration/SKILL.md",
+      "computedHash": "8c2591528893121216bed95439ecc7cfdad5e560fceb50f4c740b430ac2ce873"
+    },
+    "prometheus-grafana": {
+      "source": "bagelhole/devops-security-agent-skills",
+      "sourceType": "github",
+      "skillPath": "devops/observability/prometheus-grafana/SKILL.md",
+      "computedHash": "8f6b7a89eb33098cc8d36da7c443d91f2608526ca8df0ee8a5d4b4ddd8fb37f6"
+    },
+    "security-scanning": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "skillPath": "universal/security/security-scanning/SKILL.md",
+      "computedHash": "7aa8723e44ba0ff2da1b6450501dd96bf0fc961ec3f0428b9fbba5fcfef90687"
+    }
+  }
+}
