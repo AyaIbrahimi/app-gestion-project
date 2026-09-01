@@ -31,7 +31,12 @@ echo "Deploying target : ${NEW_COLOR} (Port ${NEW_PORT})"
 
 # 2. Start the new release container
 echo "Pulling and booting ${NEW_COLOR} release..."
-docker compose -f ${DOCKER_COMPOSE_FILE} up -d backend-${NEW_COLOR}
+if ! docker compose -f ${DOCKER_COMPOSE_FILE} up -d backend-${NEW_COLOR}; then
+    echo "ERROR: Failed to boot ${NEW_COLOR} environment! Outputting container logs..."
+    docker compose -f ${DOCKER_COMPOSE_FILE} logs postgres || true
+    docker compose -f ${DOCKER_COMPOSE_FILE} logs backend-${NEW_COLOR} || true
+    exit 1
+fi
 
 # 3. Active Health Check Probe (max 30 retries, 2s interval)
 MAX_RETRIES=30

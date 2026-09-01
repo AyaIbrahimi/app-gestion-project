@@ -33,7 +33,7 @@ export class Login implements OnInit {
   biometricAvailable = false;
   biometricLabel = 'Empreinte digitale';
 
-  dxcLogo = '/assets/DXC_logo.png';
+  dxcLogo = '/assets/image.png';
 
   emailIconSvg = `<path d="M3 8l9 6 9-6M3 8v10a2 2 0 002 2h14a2 2 0 002-2V8M3 8l6 4m12-4l-6 4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   lockIconSvg = `<path d="M12 1C6.477 1 2 5.477 2 11v2c0 5.523 4.477 10 10 10s10-4.477 10-10v-2c0-5.523-4.477-10-10-10zm0 2c4.418 0 8 3.582 8 8v2c0 4.418-3.582 8-8 8s-8-3.582-8-8v-2c0-4.418 3.582-8 8-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;

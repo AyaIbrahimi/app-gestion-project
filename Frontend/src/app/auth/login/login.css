@@ -1,90 +1,242 @@
 :host {
   display: block;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
+/* ===== Main Container (Strictly 100vh, 0 scrollbar) ===== */
 .login-container {
   display: flex;
   width: 100%;
-  min-height: 100vh;
-  background-color: #f8f9fb;
+  height: 100vh;
+  max-height: 100vh;
+  background-color: #0f172a;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ===== Left Section ===== */
+/* ===== Background Ambient Glowing Orbs ===== */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orb-1 {
+  width: 450px;
+  height: 450px;
+  top: -80px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.35) 0%, rgba(82, 49, 148, 0) 70%);
+  animation: orbPulse 10s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  width: 380px;
+  height: 380px;
+  bottom: -40px;
+  left: 25%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(59, 29, 116, 0) 70%);
+  animation: orbPulse 12s ease-in-out infinite alternate-reverse;
+}
+
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  top: 15%;
+  right: -80px;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+  animation: orbPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes orbPulse {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.08) translate(15px, -15px); }
+  100% { transform: scale(0.95) translate(-10px, 10px); }
+}
+
+/* ===== Left Hero Section ===== */
 .left-section {
-  flex: 1 0 0;
+  flex: 1.1 0 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  background-color: #523194;
-  padding: 48px;
+  background: linear-gradient(135deg, #1e1035 0%, #3b1d74 50%, #523194 100%);
+  padding: 36px 48px;
+  height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
   position: relative;
+  z-index: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
 }
 
 .left-section::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="1024" height="1024" fill="%23131117"/><rect width="1024" height="1024" fill="url(%23grid)"/></svg>');
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.6;
 }
 
-.logo-container {
-  position: relative;
-  width: 159px;
-  height: 83px;
-  z-index: 1;
+/* Hero Elements Animations */
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 2;
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.logo-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  animation: floatLogo 5s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-wrapper:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.35);
+}
+
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 .logo {
-  width: 100%;
-  height: 100%;
+  height: 32px;
+  width: auto;
   object-fit: contain;
-  object-position: left;
+}
+
+.brand-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #e9d5ff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease;
 }
 
 .hero-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 512px;
-  z-index: 1;
+  gap: 18px;
+  max-width: 480px;
+  z-index: 2;
+  margin: auto 0;
 }
 
 .hero-title {
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 60px;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
   color: #ffffff;
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.02em;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  background-size: 200% auto;
+  animation: shineText 4s linear infinite;
+}
+
+@keyframes shineText {
+  to { background-position: 200% center; }
 }
 
 .hero-description {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 32.5px;
-  color: rgba(233, 213, 255, 0.8);
+  line-height: 1.5;
+  color: rgba(233, 213, 255, 0.85);
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  word-wrap: break-word;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f3e8ff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 30px;
+  backdrop-filter: blur(8px);
+  animation: floatPill 4s ease-in-out infinite alternate;
+  transition: all 0.3s ease;
+}
+
+.pill:nth-child(2) {
+  animation-delay: 1.5s;
+}
+
+.pill:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+@keyframes floatPill {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+.pill svg {
+  width: 14px;
+  height: 14px;
+  color: #c084fc;
 }
 
 .footer-copyright {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
   color: rgba(216, 180, 254, 0.6);
   margin: 0;
-  z-index: 1;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-}
-
-.footer-copyright p {
-  margin: 0;
+  z-index: 2;
+  animation: fadeIn 0.8s ease 0.6s both;
 }
 
 /* ===== Right Section ===== */
@@ -93,81 +245,128 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f9fafb;
-  padding: 48px;
-  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 24px;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .login-card {
   width: 100%;
-  max-width: 448px;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04);
-  padding: 40px;
+  max-width: 390px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -10px rgba(82, 49, 148, 0.12), 0 6px 12px -4px rgba(0, 0, 0, 0.04);
+  padding: 30px 34px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  animation: cardScaleUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ===== Card Header ===== */
+.login-card:hover {
+  box-shadow: 0 25px 50px -10px rgba(82, 49, 148, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes cardScaleUp {
+  0% { opacity: 0; transform: scale(0.94) translateY(12px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
 .card-header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+}
+
+.header-logo-mobile {
+  display: none;
+  margin-bottom: 6px;
+}
+
+.mobile-logo {
+  height: 28px;
+  width: auto;
 }
 
 .card-title {
-  font-size: 30px;
-  font-weight: 700;
-  color: #523194;
-;
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e1035;
   margin: 0;
-  line-height: 36px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .card-subtitle {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 400;
-  color: #6b7280;
+  color: #64748b;
   margin: 0;
-  line-height: 24px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.4;
 }
 
-/* ===== Error Message ===== */
+/* Error Message with Shake Animation */
 .error-message {
-  padding: 12px 16px;
-  background-color: #fee2e2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #dc2626;
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 500;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  animation: shakeError 0.4s ease-in-out;
 }
 
-/* ===== Login Form ===== */
+.error-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Form Controls */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
 }
 
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .form-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .input-container {
@@ -179,149 +378,122 @@
 .input-icon {
   position: absolute;
   left: 12px;
-  width: 20px;
-  height: 20px;
-  color: #9ca3af;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
   pointer-events: none;
-  stroke-width: 2;
+  transition: color 0.2s ease, transform 0.2s ease;
   z-index: 1;
 }
 
 .form-input {
   width: 100%;
-  padding: 15px 41px 15px 41px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #ffffff;
-  font-size: 16px;
+  padding: 10px 38px 10px 38px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  font-size: 14px;
   font-weight: 400;
-  color: #111827;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  transition: all 0.2s ease-in-out;
+  color: #0f172a;
+  transition: all 0.25s ease;
   box-sizing: border-box;
 }
 
 .form-input::placeholder {
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .form-input:hover:not(:disabled) {
-  border-color: #d1d5db;
+  border-color: #cbd5e1;
+  background-color: #ffffff;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: #7c3aed;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3.5px rgba(124, 58, 237, 0.14);
+  transform: scale(1.005);
 }
 
-.form-input.error {
-  border-color: #ef4444;
-}
-
-.form-input:disabled {
-  background-color: #f3f4f6;
-  color: #d1d5db;
-  cursor: not-allowed;
+.input-container:focus-within .input-icon {
+  color: #7c3aed;
+  transform: scale(1.1);
 }
 
 .toggle-password {
   position: absolute;
-  right: 12px;
+  right: 8px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
-  transition: color 0.2s ease-in-out;
-  width: 20px;
-  height: 20px;
+  color: #94a3b8;
+  transition: color 0.2s ease, transform 0.2s ease;
   z-index: 2;
 }
 
 .toggle-password:hover {
-  color: #6b7280;
+  color: #475569;
+  transform: scale(1.1);
 }
 
 .toggle-password svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
+  width: 16px;
+  height: 16px;
 }
 
 .error-text {
-  font-size: 12px;
-  color: #dc2626;
-  margin-top: 4px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-top: 1px;
+  animation: fadeIn 0.3s ease;
 }
 
-/* ===== Submit Button ===== */
+/* Submit Button with Shine Sweep Effect */
 .submit-button {
   display: flex;
-  gap: 8px;
   align-items: center;
   justify-content: center;
-  padding: 14px 0;
-  background-color: #0f172a;
+  gap: 8px;
+  padding: 11px 18px;
+  background: linear-gradient(135deg, #523194 0%, #3b1d74 100%);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0px 10px 15px -3px rgba(88, 28, 135, 0.2), 0px 4px 6px -4px rgba(88, 28, 135, 0.2);
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 16px -4px rgba(82, 49, 148, 0.35);
   width: 100%;
-  box-sizing: border-box;
+  margin-top: 2px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Biometric button */
-.biometric-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 0;
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
-  border-radius: 8px;
-  color: #4338ca;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+.submit-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
   width: 100%;
-  box-sizing: border-box;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  animation: lightSweep 4s ease-in-out infinite;
 }
 
-.biometric-button:hover:not(:disabled) {
-  background-color: #e0e7ff;
-  border-color: #a5b4fc;
-  transform: translateY(-1px);
-}
-
-.biometric-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.biometric-button:disabled {
-  background-color: #f3f4f6;
-  color: #94a3b8;
-  border-color: #e5e7eb;
-  cursor: not-allowed;
-  opacity: 0.8;
+@keyframes lightSweep {
+  0% { left: -150%; }
+  35%, 100% { left: 150%; }
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #111827;
-  box-shadow: 0px 15px 20px -3px rgba(88, 28, 135, 0.3), 0px 6px 8px -4px rgba(88, 28, 135, 0.3);
+  background: linear-gradient(135deg, #643bb5 0%, #46238b 100%);
+  box-shadow: 0 12px 22px -4px rgba(82, 49, 148, 0.45);
   transform: translateY(-2px);
 }
 
@@ -330,15 +502,20 @@
 }
 
 .submit-button:disabled {
-  background-color: #6b7280;
+  background: #cbd5e1;
   cursor: not-allowed;
-  opacity: 0.7;
   box-shadow: none;
+  opacity: 0.8;
 }
 
-.button-icon {
-  width: 20px;
-  height: 20px;
+.button-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.submit-button:hover:not(:disabled) .button-arrow {
+  transform: translateX(4px);
 }
 
 .spinner {
@@ -352,85 +529,128 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* ===== Responsive Design ===== */
-@media (max-width: 768px) {
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.divider span {
+  padding: 0 8px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Biometric Button */
+.biometric-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.biometric-button svg {
+  animation: pulseIcon 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); color: #7c3aed; }
+}
+
+.biometric-button:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #1e1035;
+  transform: translateY(-1px);
+}
+
+/* Security Badge */
+.security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.security-badge svg {
+  width: 13px;
+  height: 13px;
+  color: #10b981;
+}
+
+/* Common Keyframe Utility Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  :host {
+    height: auto;
+    overflow: auto;
+  }
+
   .login-container {
     flex-direction: column;
-    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: auto;
   }
 
   .left-section {
-    padding: 32px;
-    min-height: 40vh;
-  }
-
-  .hero-title {
-    font-size: 36px;
-    line-height: 44px;
-  }
-
-  .hero-description {
-    font-size: 16px;
-    line-height: 24px;
-  }
-
-  .right-section {
-    padding: 32px 16px;
-    min-height: auto;
-  }
-
-  .login-card {
-    max-width: 100%;
-    padding: 32px 24px;
-    gap: 32px;
-  }
-
-  .card-title {
-    font-size: 24px;
-    line-height: 32px;
-  }
-}
-
-@media (max-width: 480px) {
-  .login-container {
-    flex-direction: column;
-  }
-
-  .left-section {
-    padding: 24px;
-    min-height: 30vh;
-  }
-
-  .hero-title {
-    font-size: 28px;
-    line-height: 36px;
-  }
-
-  .hero-description {
-    font-size: 14px;
-    line-height: 21px;
+    padding: 28px 20px;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .right-section {
     padding: 24px 16px;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
-  .login-card {
-    padding: 24px 16px;
-    gap: 24px;
-  }
-
-  .card-title {
-    font-size: 20px;
-    line-height: 28px;
-  }
-
-  .card-subtitle {
-    font-size: 14px;
+  .header-logo-mobile {
+    display: block;
   }
 }

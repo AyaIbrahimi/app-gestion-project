@@ -6,24 +6,45 @@
 }
 
 <div class="login-container">
+  <!-- Background Ambient Orbs -->
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+  <div class="ambient-orb orb-3"></div>
+
   <!-- Left Hero Section -->
   <div class="left-section">
-    <div class="logo-container">
-      <img [src]="dxcLogo" alt="DXC Technology" class="logo" />
+    <div class="hero-brand">
+      <div class="logo-wrapper">
+        <img [src]="dxcLogo" alt="DXC Technology" class="logo" />
+      </div>
+      <span class="brand-badge">DXC Enterprise</span>
     </div>
+
     <div class="hero-content">
       <h1 class="hero-title">
         Offrir l'excellence<br />
-        à nos clients<br />
+        <span class="gradient-text">à nos clients</span><br />
         et à nos collègues.
       </h1>
       <p class="hero-description">
-        Accédez à la plateforme DXC pour gérer vos projets,
-        collaborer avec vos équipes et stimuler l'innovation.
+        Accédez à la plateforme DXC pour piloter vos projets,
+        optimiser la collaboration d'équipe et accélérer l'innovation.
       </p>
+
+      <div class="feature-pills">
+        <div class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Sécurité & Biométrie
+        </div>
+        <div class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Suivi en Temps Réel
+        </div>
+      </div>
     </div>
+
     <div class="footer-copyright">
-      <p>© 2026 DXC Technology</p>
+      <p>© 2026 DXC Technology. Tous droits réservés.</p>
     </div>
   </div>
 
@@ -31,15 +52,23 @@
   <div class="right-section">
     <div class="login-card">
       <div class="card-header">
+        <div class="header-logo-mobile">
+          <img [src]="dxcLogo" alt="DXC Technology" class="mobile-logo" />
+        </div>
         <h2 class="card-title">Bienvenue</h2>
         <p class="card-subtitle">
-          Veuillez saisir vos identifiants pour accéder à votre compte.
+          Saisissez vos identifiants pour accéder à votre espace DXC.
         </p>
       </div>
 
       @if (errorMessage()) {
         <div class="error-message">
-          {{ errorMessage() }}
+          <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
@@ -49,13 +78,12 @@
         <div class="form-group">
           <label for="email" class="form-label">Adresse Email</label>
           <div class="input-container">
-            <svg class="input-icon" [attr.aria-hidden]="true"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M3 8l9 6 9-6M3 8v10a2 2 0 002 2h14a2 2 0 002-2V8M3 8l6 4m12-4l-6 4"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <input id="email" type="email" formControlName="email"
-                   placeholder="name@dxc.ma" class="form-input" required/>
+                   placeholder="nom@dxc.ma" class="form-input" required/>
           </div>
           @if (email?.invalid && email?.touched) {
             <span class="error-text">Veuillez entrer une adresse email valide</span>
@@ -64,12 +92,13 @@
 
         <!-- Password Field -->
         <div class="form-group">
-          <label for="password" class="form-label">Mot de passe</label>
+          <div class="label-row">
+            <label for="password" class="form-label">Mot de passe</label>
+          </div>
           <div class="input-container">
-            <svg class="input-icon" [attr.aria-hidden]="true"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M12 1C6.477 1 2 5.477 2 11v2c0 5.523 4.477 10 10 10s10-4.477 10-10v-2c0-5.523-4.477-10-10-10zm0 2c4.418 0 8 3.582 8 8v2c0 4.418-3.582 8-8 8s-8-3.582-8-8v-2c0-4.418 3.582-8 8-8z"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"/>
+              <path d="M7 11V7a5 5 0 0110 0v4" stroke-width="2"/>
             </svg>
             <input id="password"
                    [type]="showPassword() ? 'text' : 'password'"
@@ -100,54 +129,63 @@
           }
         </div>
 
-        <!-- Bouton biométrique -->
-        @if (biometricAvailable) {
-          <div class="form-group">
-            <button
-              type="button"
-              class="biometric-button"
-              (click)="loginWithBiometrics()"
-              [disabled]="!email?.valid || isLoading()">
-              @if (biometricLabel.includes('Face ID')) {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                  <rect x="2" y="2" width="20" height="20" rx="5"/>
-                  <circle cx="9" cy="10" r="1" fill="currentColor"/>
-                  <circle cx="15" cy="10" r="1" fill="currentColor"/>
-                  <path d="M9 15.5c.8 1 2 1.5 3 1.5s2.2-.5 3-1.5" stroke-linecap="round"/>
-                </svg>
-              } @else {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                  <path d="M12 2a7 7 0 0 1 7 7v1a12 12 0 0 1-1.5 5.8"/>
-                  <path d="M5.5 15.5A12 12 0 0 1 5 9a7 7 0 0 1 10.5-6.1"/>
-                  <path d="M12 8a1 1 0 0 1 1 1v3a6 6 0 0 1-.8 3"/>
-                  <path d="M9 9a3 3 0 0 1 5.8-1"/>
-                </svg>
-              }
-              Se connecter avec {{ biometricLabel }}
-            </button>
-          </div>
-        }
-
         <!-- Submit Button -->
         <button type="submit"
                 [disabled]="!loginForm.valid || isLoading()"
                 class="submit-button"
                 [class.loading]="isLoading()">
           @if (!isLoading()) {
-            <svg class="button-icon" viewBox="0 0 24 24"
-                 fill="currentColor" [attr.aria-hidden]="true">
-              <path d="M13.5 0h-12v24h12V0zm8.5 11h-8v2h8v-2zM14.5 3v2h8V3h-8z"/>
+            <span>Se connecter</span>
+            <svg class="button-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
             </svg>
-            Se connecter
           } @else {
             <span class="spinner"></span>
-            Connexion en cours...
+            <span>Connexion en cours...</span>
           }
         </button>
 
+        <!-- Biometric Button -->
+        @if (biometricAvailable) {
+          <div class="divider">
+            <span>OU</span>
+          </div>
+          <button
+            type="button"
+            class="biometric-button"
+            (click)="loginWithBiometrics()"
+            [disabled]="!email?.valid || isLoading()">
+            @if (biometricLabel.includes('Face ID')) {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="9" cy="10" r="1" fill="currentColor"/>
+                <circle cx="15" cy="10" r="1" fill="currentColor"/>
+                <path d="M9 15.5c.8 1 2 1.5 3 1.5s2.2-.5 3-1.5" stroke-linecap="round"/>
+              </svg>
+            } @else {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2a7 7 0 0 1 7 7v1a12 12 0 0 1-1.5 5.8"/>
+                <path d="M5.5 15.5A12 12 0 0 1 5 9a7 7 0 0 1 10.5-6.1"/>
+                <path d="M12 8a1 1 0 0 1 1 1v3a6 6 0 0 1-.8 3"/>
+                <path d="M9 9a3 3 0 0 1 5.8-1"/>
+              </svg>
+            }
+            Se connecter avec {{ biometricLabel }}
+          </button>
+        }
+
       </form>
+
+      <div class="security-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        <span>Connexion sécurisée SSL 256-bit</span>
+      </div>
     </div>
   </div>
 </div>
