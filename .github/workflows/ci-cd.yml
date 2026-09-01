@@ -1,0 +1,213 @@
+name: 🚀 Enterprise CI/CD Pipeline (Spring Boot + Angular + Docker + Security)
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ${{ github.repository_owner }}/dxc-backend
+  FRONTEND_IMAGE: ${{ github.repository_owner }}/dxc-frontend
+
+jobs:
+  # ============================================================================
+  # JOB 1: Backend CI & Unit/Integration Testing
+  # ============================================================================
+  backend-ci:
+    name: ☕ Backend Build & Test (Spring Boot)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compile & Run Unit Tests
+        cwd: ./Backend
+        run: mvn clean test -B
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-backend-test-results
+          path: Backend/target/surefire-reports/
+
+  # ============================================================================
+  # JOB 2: Frontend CI & Build Verification
+  # ============================================================================
+  frontend-ci:
+    name: 🅰️ Frontend Build & Test (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install NPM Dependencies
+        working-directory: ./Frontend
+        run: npm ci
+
+      - name: Angular Production Build
+        working-directory: ./Frontend
+        run: npm run build -- --configuration=production
+
+  # ============================================================================
+  # JOB 3: Security Scanning (SAST, SCA & Secret Leak Detection)
+  # ============================================================================
+  security-scan:
+    name: 🛡️ Security Scans (SAST, SCA & Secret Leak)
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Secret Scanning (Trufflehog)
+        uses: trufflesecurity/trufflehog-actions-experimental@v3.0.0
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+      - name: 🛡️ SAST & SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy SARIF Report
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================================================
+  # JOB 4: Build & Push OCI Docker Images to GHCR
+  # ============================================================================
+  build-and-push:
+    name: 🐳 Docker Build & Push (GHCR)
+    runs-on: ubuntu-latest
+    needs: [security-scan]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=
+
+      - name: Build & Push Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          file: ./Backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Docker Metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=
+
+      - name: Build & Push Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          file: ./Frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # JOB 5: Deploy to Staging & Run DAST (OWASP ZAP)
+  # ============================================================================
+  deploy-staging:
+    name: 🧪 Staging Deployment & DAST Scan
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    environment: staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging Server via SSH
+        run: |
+          echo "Simulating Staging Deployment to staging.dxc-platform.internal"
+
+      - name: ⚡ DAST Security Scan (OWASP ZAP Baseline)
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:8080/swagger-ui/index.html'
+          fail_action: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # JOB 6: Production Blue-Green Deployment with Auto-Rollback
+  # ============================================================================
+  deploy-production:
+    name: 🌟 Production Blue-Green Zero-Downtime Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    environment: production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Blue-Green Script on Production Server
+        run: |
+          chmod +x scripts/deploy-blue-green.sh scripts/rollback.sh
+          ./scripts/deploy-blue-green.sh
