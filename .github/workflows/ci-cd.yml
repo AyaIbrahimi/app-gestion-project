@@ -33,7 +33,7 @@ jobs:
 
       - name: Compile & Run Unit Tests
         working-directory: ./Backend
-        run: mvn clean test -B
+        run: mvn clean test -Dspring.profiles.active=test -B
 
       - name: Upload Test Reports
         if: always()
