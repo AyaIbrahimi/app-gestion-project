@@ -194,19 +194,64 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-push]
     environment: staging
+    permissions:
+      contents: read
+      packages: read
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: gestion_projet
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Staging Server via SSH
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start Backend Container
         run: |
-          echo "Simulating Staging Deployment to staging.dxc-platform.internal"
+          docker run -d --name backend \
+            --network host \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/gestion_projet \
+            -e SPRING_DATASOURCE_USERNAME=postgres \
+            -e SPRING_DATASOURCE_PASSWORD=postgres \
+            ghcr.io/ayaibrahimi/dxc-backend:${{ github.sha }}
+
+      - name: Wait for Backend Health Check
+        run: |
+          max_attempts=30
+          attempt=1
+          until curl -f http://localhost:8080/actuator/health || [ $attempt -eq $max_attempts ]; do
+            echo "Waiting for backend service... (attempt $attempt/$max_attempts)"
+            sleep 2
+            ((attempt++))
+          done
+          if [ $attempt -gt $max_attempts ]; then
+            echo "Backend service failed to start"
+            docker logs backend
+            exit 1
+          fi
 
       - name: ⚡ DAST Security Scan (OWASP ZAP Baseline)
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:8080/swagger-ui/index.html'
+          target: 'http://localhost:8080/actuator/health'
           fail_action: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
