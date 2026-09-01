@@ -252,6 +252,7 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:8080/actuator/health'
+          artifact_name: zap-scan
           fail_action: false
           allow_issue_writing: false
           token: ${{ secrets.GITHUB_TOKEN }}
