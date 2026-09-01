@@ -91,7 +91,7 @@ jobs:
 
       - name: Warm up Maven dependencies
         working-directory: ./Backend
-        run: mvn -B -q dependency:go-offline || true
+        run: mvn -B -q dependency:resolve -Dmaven.wagon.http.retryHandler.count=5 || true
 
       - name: 🔍 Secret Scanning (Trufflehog)
         uses: trufflesecurity/trufflehog@main
