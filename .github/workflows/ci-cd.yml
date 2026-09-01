@@ -32,7 +32,7 @@ jobs:
           cache: 'maven'
 
       - name: Compile & Run Unit Tests
-        cwd: ./Backend
+        working-directory: ./Backend
         run: mvn clean test -B
 
       - name: Upload Test Reports
