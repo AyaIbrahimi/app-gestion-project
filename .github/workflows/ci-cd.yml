@@ -296,6 +296,9 @@ jobs:
           IMAGE_NAME_BACKEND: ${{ env.BACKEND_IMAGE }}
           IMAGE_TAG: latest
           IMAGE_TAG_GREEN: latest
+          POSTGRES_PASSWORD: postgres
+          JWT_SECRET: TXlDbGVTZWNyZXRNYUNsZVNlY3JldE1hQ2xlU2VjcmV0MTIzNDU=
+          NVIDIA_API_KEY: test-key
         run: |
           chmod +x scripts/deploy-blue-green.sh scripts/rollback.sh
           ./scripts/deploy-blue-green.sh
