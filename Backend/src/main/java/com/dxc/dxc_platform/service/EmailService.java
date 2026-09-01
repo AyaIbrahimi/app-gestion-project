@@ -38,7 +38,7 @@ public class EmailService {
         this.notificationService = notificationService;
     }
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:dxc.platform.app@gmail.com}")
     private String fromEmail;
 
     @Value("${app.base-url}")
