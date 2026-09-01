@@ -9,8 +9,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ${{ github.repository_owner }}/dxc-backend
-  FRONTEND_IMAGE: ${{ github.repository_owner }}/dxc-frontend
+  BACKEND_IMAGE: ayaibrahimi/dxc-backend
+  FRONTEND_IMAGE: ayaibrahimi/dxc-frontend
 
 jobs:
   # ============================================================================
@@ -101,7 +101,7 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.pull_request.base.sha || github.event.before }}
+          base: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
           head: ${{ github.event.pull_request.head.sha || github.sha }}
           extra_args: --only-verified
         continue-on-error: true
@@ -153,7 +153,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=
+            type=sha,format=long,prefix=
 
       - name: Build & Push Backend Docker Image
         uses: docker/build-push-action@v5
@@ -173,7 +173,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=
+            type=sha,format=long,prefix=
 
       - name: Build & Push Frontend Docker Image
         uses: docker/build-push-action@v5
@@ -197,6 +197,8 @@ jobs:
     permissions:
       contents: read
       packages: read
+      issues: write
+      pull-requests: write
 
     services:
       postgres:

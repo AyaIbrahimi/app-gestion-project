@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { Projets } from './projets';
 
@@ -8,7 +11,12 @@ describe('Projets', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Projets]
+      imports: [Projets],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
@@ -21,3 +29,4 @@ describe('Projets', () => {
     expect(component).toBeTruthy();
   });
 });
+
