@@ -21,9 +21,11 @@ echo "Ensuring fallback container ${FALLBACK_COLOR} is running..."
 docker compose -f docker-compose.prod.yml start backend-${FALLBACK_COLOR} || true
 
 # 2. Revert Nginx Traffic to Fallback Container
-echo "Restoring Nginx traffic route to ${FALLBACK_COLOR} (Port ${FALLBACK_PORT})..."
-echo "upstream backend_server { server 127.0.0.1:${FALLBACK_PORT}; }" | sudo tee ${NGINX_UPSTREAM_CONF} > /dev/null
-sudo nginx -s reload || sudo systemctl reload nginx
+if [ -d "/etc/nginx" ]; then
+    sudo mkdir -p /etc/nginx/conf.d 2>/dev/null || true
+    echo "upstream backend_server { server 127.0.0.1:${FALLBACK_PORT}; }" | sudo tee ${NGINX_UPSTREAM_CONF} > /dev/null 2>&1 || true
+    sudo nginx -s reload 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || echo "Nginx not active on host (skipping reload)"
+fi
 
 # 3. Stop failed container
 echo "Stopping failed release container backend-${FAILED_COLOR}..."

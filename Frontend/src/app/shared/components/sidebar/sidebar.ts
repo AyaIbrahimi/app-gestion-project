@@ -155,6 +155,16 @@ export class SidebarComponent implements OnInit {
     return visibleItems;
   });
 
+  getRolePortalTitle(): string {
+    const roles = this.authService.getRoles() || [];
+    if (roles.includes('ADMIN')) return 'Portail Admin';
+    if (roles.includes('CHEF_PROJET')) return 'Portail Chef de Projet';
+    if (roles.includes('MANAGER')) return 'Portail Manager';
+    if (roles.includes('MEMBRE_EQUIPE')) return "Portail Membre d'Équipe";
+    if (roles.includes('RESPONSABLE_CONTRAT')) return 'Portail Responsable Contrat';
+    return 'Portail Utilisateur';
+  }
+
   ngOnInit(): void {
     const user = this.authService.getUser();
     if (user?.mustChangePassword) {

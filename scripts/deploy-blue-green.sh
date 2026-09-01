@@ -63,8 +63,11 @@ if [ "$IS_HEALTHY" = true ]; then
     echo "Healthcheck succeeded! Switching Nginx traffic to ${NEW_COLOR} (Port ${NEW_PORT})..."
     
     # Update Nginx upstream config dynamically
-    echo "upstream backend_server { server 127.0.0.1:${NEW_PORT}; }" | sudo tee ${NGINX_UPSTREAM_CONF} > /dev/null
-    sudo nginx -s reload || sudo systemctl reload nginx
+    if [ -d "/etc/nginx" ]; then
+        sudo mkdir -p /etc/nginx/conf.d 2>/dev/null || true
+        echo "upstream backend_server { server 127.0.0.1:${NEW_PORT}; }" | sudo tee ${NGINX_UPSTREAM_CONF} > /dev/null 2>&1 || true
+        sudo nginx -s reload 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || echo "Nginx not active on host (skipping reload)"
+    fi
     
     echo "Stopping old ${CURRENT_COLOR} container..."
     sleep 5
