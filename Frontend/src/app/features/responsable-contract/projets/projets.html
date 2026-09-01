@@ -1,0 +1,600 @@
+<div class="projects-page">
+  <div class="breadcrumb">
+    <span class="breadcrumb-parent" routerLink="/responsable-contrat/dashboard">Tableau de bord</span>
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+    <span class="breadcrumb-current">Projets</span>
+  </div>
+
+  <div class="page-header page-header-projects">
+    <div class="page-title-block">
+      <h1 class="page-title">Projets</h1>
+      <p class="page-subtitle">Consultez et gérez l'ensemble des projets de l'organisation.</p>
+    </div>
+
+    <button class="btn-create btn-purple" type="button" (click)="openCreateForm()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Créer un Projet
+    </button>
+  </div>
+
+  <div class="toolbar-card">
+    <div class="toolbar-left">
+      <div class="search-wrapper search-grow">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          name="searchProject"
+          class="search-input search-input-large"
+          placeholder="Rechercher un projet ou un client..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+        />
+      </div>
+      <button class="btn-reset" type="button" (click)="clearSearch()">Effacer</button>
+    </div>
+
+    <div class="tabs-filter">
+      <button type="button" class="tab-btn" [class.active]="isStatusActive('')" (click)="setStatusFilter('')">
+        Tous
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="isStatusActive('EN_VALIDATION')" (click)="setStatusFilter('EN_VALIDATION')">
+        En cours de validation
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="isStatusActive('PRE_VALIDE')" (click)="setStatusFilter('PRE_VALIDE')">
+        Pré-validés
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="isStatusActive('EN_COURS')" (click)="setStatusFilter('EN_COURS')">
+        En cours de réalisation
+      </button>
+
+     <button type="button" class="tab-btn" [class.active]="isStatusActive('REJETE')" (click)="setStatusFilter('REJETE')">
+  Rejetés
+</button>
+
+<button type="button" class="tab-btn" [class.active]="isStatusActive('CLOTURE')" (click)="setStatusFilter('CLOTURE')">
+  Clôturés
+</button>
+    </div>
+  </div>
+
+  <div class="table-card projects-card">
+    <div class="table-header-strip">
+      <div>
+        <h3>Liste des projets</h3>
+        <p>{{ projects.length }} projet(s)</p>
+      </div>
+
+      <span class="pagination-top-info" *ngIf="!loading && !error && projects.length > 0">
+        Affichage de {{ startItem }}-{{ endItem }} sur {{ projects.length }} projets
+      </span>
+    </div>
+
+    <table class="users-table projects-table">
+      <thead>
+        <tr>
+          <th class="col-project">NOM DU PROJET</th>
+          <th>CLIENT</th>
+          <th>MANAGER</th>
+          <th>ÉQUIPE</th>
+          <th>DATES</th>
+          <th>STATUT</th>
+          <th class="col-actions">ACTIONS</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngIf="loading">
+          <td colspan="7" class="cell-center state-cell">Chargement des projets...</td>
+        </tr>
+
+        <tr *ngIf="error">
+          <td colspan="7" class="cell-center state-cell error-text">{{ error }}</td>
+        </tr>
+
+        <tr *ngIf="!loading && !error && projects.length === 0">
+          <td colspan="7" class="cell-center state-cell">Aucun projet trouvé.</td>
+        </tr>
+
+        <tr *ngFor="let project of paginatedProjects">
+          <td class="project-main-cell">
+            <div class="project-cell">
+              <div class="project-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4.5 16.5c-1.5 1.5-2 3.5-1.5 5 1.5.5 3.5 0 5-1.5l8-8-3.5-3.5-8 8z" />
+                  <path d="M14 4l6 6" />
+                  <path d="M12 6l6 6" />
+                </svg>
+              </div>
+              <div class="user-name-block">
+                <span class="user-fullname" [title]="project.name">{{ project.name }}</span>
+                <span class="project-subline">{{ project.description || 'Projet stratégique' }}</span>
+              </div>
+            </div>
+          </td>
+
+          <td class="client-col">
+            <div class="client-name">{{ project.client }}</div>
+          </td>
+
+          <td>{{ project.managerName || '-' }}</td>
+
+          <td>{{ project.teamName || 'Non affectée' }}</td>
+
+          <td class="date-col">
+            <div class="date-main">{{ project.startDate | date:'dd/MM/yy' }}</div>
+            <div class="date-muted">Fin: {{ project.endDate | date:'dd/MM/yy' }}</div>
+          </td>
+
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(project.status)">
+              {{ getStatusLabel(project.status) }}
+            </span>
+          </td>
+
+          <td class="actions-cell col-actions">
+  <button
+    class="icon-action-btn icon-edit"
+    type="button"
+    [title]="isProjectInProgress(project) || project.status === 'CLOTURE' ? 'Action désactivée' : 'Modifier'"
+    [disabled]="isProjectInProgress(project) || project.status === 'CLOTURE'"
+    (click)="openEditForm(project)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+    </svg>
+  </button>
+
+  <button
+    class="icon-action-btn icon-delete"
+    type="button"
+    [title]="isProjectInProgress(project) || project.status === 'CLOTURE' ? 'Action désactivée' : 'Supprimer'"
+    [disabled]="isProjectInProgress(project) || project.status === 'CLOTURE'"
+    (click)="confirmDelete(project)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+      <path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+  </button>
+
+  <button
+    class="icon-action-btn icon-view"
+    type="button"
+    title="Voir détails"
+    (click)="openDetails(project)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  </button>
+
+  <button
+    class="icon-action-btn icon-billing"
+    type="button"
+    [disabled]="project.status !== 'EN_COURS'"
+    [title]="project.status !== 'EN_COURS' ? 'Action désactivée (disponible seulement en cours de réalisation)' : 'Calculer la facture'"
+    (click)="goToBilling(project)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <line x1="8" y1="7" x2="16" y2="7" />
+      <line x1="8" y1="11" x2="16" y2="11" />
+      <line x1="8" y1="15" x2="12" y2="15" />
+    </svg>
+  </button>
+</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-bar" *ngIf="!loading && !error && projects.length > 0">
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn pagination-nav"
+          type="button"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1">
+          ‹
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers"
+          class="pagination-btn"
+          type="button"
+          [class.active]="currentPage === page"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn pagination-nav"
+          type="button"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">
+          ›
+        </button>
+      </div>
+
+      <div class="pagination-bottom-info">
+        Affichant {{ itemsPerPage }} par page
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal : Créer / Modifier un projet -->
+<div class="modal-backdrop" *ngIf="showForm">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-icon">📁</div>
+        <div>
+          <h2>{{ isEditMode ? 'Modifier un projet' : 'Créer un projet' }}</h2>
+          <p class="modal-subtitle">
+            {{ isEditMode ? 'Mettez à jour les informations du projet.' : 'Ajoutez un nouveau projet à votre portefeuille.' }}
+          </p>
+        </div>
+      </div>
+      <button class="modal-close-btn" type="button" (click)="closeForm()" aria-label="Fermer">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-group-full">
+          <label>Nom du projet</label>
+          <input
+            type="text"
+            name="projectName"
+            [(ngModel)]="projectForm.name"
+            [disabled]="isRejectedEditMode()"
+            placeholder="Ex: Projet Alpha"
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label>Description</label>
+          <textarea
+            name="projectDescription"
+            [(ngModel)]="projectForm.description"
+            [disabled]="isRejectedEditMode()"
+            placeholder="Décrivez l'objectif du projet..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Client</label>
+          <select
+            name="projectClient"
+            [(ngModel)]="projectForm.client"
+            [disabled]="isRejectedEditMode()"
+            (ngModelChange)="onClientChange()">
+            <option value="">Choisir un client</option>
+            <option *ngFor="let c of clients" [value]="c.nom">{{ c.nom }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Représentant</label>
+          <select
+            name="projectRepresentant"
+            [(ngModel)]="selectedRepresentantId"
+            [disabled]="isRejectedEditMode() || !projectForm.client || selectedRepresentants.length === 0">
+            <option [ngValue]="null">Choisir un représentant</option>
+            <option *ngFor="let r of selectedRepresentants" [ngValue]="r.id">
+              {{ r.nom }} - {{ r.email }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Manager</label>
+          <select name="projectManager" [(ngModel)]="projectForm.managerId">
+            <option [ngValue]="undefined">
+              {{ isRejectedEditMode() ? 'Choisir un nouveau manager' : 'Choisir un manager' }}
+            </option>
+            <option *ngFor="let manager of managers" [ngValue]="manager.id">
+              {{ manager.fullName }}
+            </option>
+          </select>
+          <small *ngIf="isRejectedEditMode()" style="color:#dc2626; font-size:12px; font-weight:600;">
+            Le manager qui a rejeté ce projet n'est plus affiché dans la liste.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Date début</label>
+          <input
+            type="date"
+            name="projectStartDate"
+            [(ngModel)]="projectForm.startDate"
+            (ngModelChange)="onStartDateChange()"
+            [disabled]="isRejectedEditMode()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Date fin</label>
+          <input
+            type="date"
+            name="projectEndDate"
+            [(ngModel)]="projectForm.endDate"
+            [min]="minEndDate"
+            [disabled]="isRejectedEditMode()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="formError" class="form-error">{{ formError }}</div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="closeForm()" [disabled]="isSubmitting">Annuler</button>
+      <button class="btn-primary" type="button" (click)="submitForm()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Envoi...' : (isEditMode ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal : Détails projet -->
+<div class="modal-backdrop modal-details-backdrop" *ngIf="showDetailsModal" (click)="closeDetails()">
+  <div class="modal-card modal-details-card" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-details-header">
+      <div class="modal-title-wrap modal-details-title-wrap">
+        <div>
+          <h2>Détails du projet</h2>
+          <p class="modal-subtitle">Suivi complet du projet et workflow</p>
+        </div>
+      </div>
+      <button class="modal-close-btn modal-details-close" type="button" (click)="closeDetails()" aria-label="Fermer">×</button>
+    </div>
+
+    <div class="modal-body modal-details-body" *ngIf="selectedProjectDetails as project">
+      
+
+      <div class="details-workflow-card">
+        <div class="details-workflow-head">
+          <h3>Workflow du projet</h3>
+          <p>Étapes de validation et d'avancement</p>
+        </div>
+
+        <div class="workflow-timeline">
+          <div
+            class="workflow-step"
+            *ngFor="let step of getWorkflowSteps(project); let i = index"
+            [class.is-complete]="step.state === 'complete'"
+            [class.is-current]="step.state === 'current'"
+            [class.is-upcoming]="step.state === 'upcoming'"
+            [class.is-rejected]="step.state === 'rejected'"
+          >
+            <div class="workflow-line" *ngIf="i < getWorkflowSteps(project).length - 1"></div>
+
+            <div class="workflow-marker" [attr.data-stage]="i + 1">
+              <ng-container [ngSwitch]="step.icon">
+                <svg *ngSwitchCase="'create'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+                  <path d="M8 2v4M16 2v4M3 10h18"></path>
+                </svg>
+
+                <svg *ngSwitchCase="'validate'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+
+                <svg *ngSwitchCase="'rejected'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+
+                <svg *ngSwitchCase="'manager'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21a8 8 0 0 0-16 0"></path>
+                  <circle cx="12" cy="8" r="4"></circle>
+                </svg>
+
+                <svg *ngSwitchCase="'chef'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21a8 8 0 0 0-16 0"></path>
+                  <circle cx="12" cy="8" r="4"></circle>
+                </svg>
+
+                <svg *ngSwitchCase="'team'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+
+                <svg *ngSwitchCase="'progress'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="7 4 19 12 7 20 7 4"></polygon>
+                </svg>
+
+                <svg *ngSwitchCase="'close'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 5v14"></path>
+                  <path d="M5 5h10l-2.5 4L15 13H5"></path>
+                </svg>
+              </ng-container>
+            </div>
+
+            <div class="workflow-index">{{ i + 1 }}</div>
+            <div class="workflow-title">{{ step.label }}</div>
+            <div class="workflow-date">{{ step.date }}</div>
+            <div class="workflow-time">{{ step.time }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="details-top-grid">
+        <div class="detail-info-card">
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-project">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+                <path d="M8 2v4M16 2v4M3 10h18"></path>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Projet</span>
+              <strong>{{ project.name }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-client">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 21h18"></path>
+                <path d="M5 21V7l7-4 7 4v14"></path>
+                <path d="M9 9h.01M9 12h.01M9 15h.01M15 9h.01M15 12h.01M15 15h.01"></path>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Client</span>
+              <strong>{{ project.client }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-manager">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                <circle cx="12" cy="8" r="4"></circle>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Manager</span>
+              <strong>{{ project.managerName || 'Non affecté' }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-team">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Équipe</span>
+              <strong>{{ project.teamName || 'Non affectée' }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-chef">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                <circle cx="12" cy="8" r="4"></circle>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Chef de projet</span>
+              <strong>{{ project.chefProjetName || 'Non affecté' }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-info-item">
+            <div class="detail-info-icon detail-info-icon-status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 5v14"></path>
+                <path d="M5 5h10l-2.5 4L15 13H5"></path>
+              </svg>
+            </div>
+            <div class="detail-info-content">
+              <span class="detail-label">Statut actuel</span>
+              <span class="status-pill details-status-pill" [ngClass]="getStatusClass(project.status)">
+                {{ getStatusLabel(project.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-meta-card">
+          <div class="details-comment-block">
+            <div class="detail-info-icon detail-info-icon-comment">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+              </svg>
+            </div>
+            <div class="details-meta-content">
+              <span class="detail-label">Commentaire du manager</span>
+              <div class="details-comment-box">
+                {{ project.managerComment || 'Aucun commentaire disponible.' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="details-date-block">
+            <div class="detail-info-icon detail-info-icon-date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="3"></rect>
+                <path d="M8 2v4M16 2v4M3 10h18"></path>
+              </svg>
+            </div>
+            <div class="details-meta-content">
+              <span class="detail-label">Date de traitement</span>
+              <strong>{{ formatDateTime(project.reviewedAt || project.updatedAt || project.createdAt) }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer modal-details-footer">
+      <button class="btn-secondary" type="button" (click)="closeDetails()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal : Confirmation suppression -->
+<div class="modal-backdrop" *ngIf="showDeleteConfirm">
+  <div class="modal-card modal-confirm">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-icon modal-icon-danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+            <path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+        </div>
+        <div>
+          <h2>Supprimer le projet</h2>
+          <p class="modal-subtitle">Cette action est irréversible.</p>
+        </div>
+      </div>
+      <button class="modal-close-btn" type="button" (click)="cancelDelete()" aria-label="Fermer">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="confirm-msg">
+        Êtes-vous sûr de vouloir supprimer le projet
+        <strong>« {{ projectToDelete?.name }} »</strong> ?
+        <br />
+        <span class="confirm-sub">Toutes les données associées seront perdues.</span>
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="cancelDelete()">Annuler</button>
+      <button class="btn-danger" type="button" (click)="deleteProject()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+          <path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" />
+        </svg>
+        Confirmer la suppression
+      </button>
+    </div>
+  </div>
+</div>

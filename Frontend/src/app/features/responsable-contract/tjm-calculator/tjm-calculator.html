@@ -1,0 +1,206 @@
+<div class="billing-page">
+  <div class="breadcrumb">
+    <span class="breadcrumb-link" routerLink="/responsable-contrat/projets">Projets</span>
+    <span class="breadcrumb-separator">›</span>
+    <span class="breadcrumb-current">Facturation</span>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Facturation du projet</h1>
+      <p class="page-subtitle">Calculez la facture selon les jours saisis et le TJM de chaque profil.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-light" type="button" (click)="goBack()">Retour</button>
+      <button class="btn btn-success" type="button" (click)="saveBilling()" [disabled]="isProjectClosed">Sauvegarder</button>
+      <button class="btn btn-primary" type="button" (click)="generatePdf()">Télécharger PDF</button>
+    </div>
+  </div>
+
+  <div class="alert-success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="state-card" *ngIf="loading">
+    Chargement des données...
+  </div>
+
+  <div class="state-card state-error" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!loading && !error && project">
+
+    <div class="project-card">
+      <div class="project-card-header">
+        <div>
+          <h2>{{ project.name }}</h2>
+          <p>{{ project.description || 'Aucune description disponible.' }}</p>
+        </div>
+        <span class="project-status">{{ getStatusLabel(project.status) }}</span>
+      </div>
+
+      <div class="project-meta">
+        <div class="meta-item">
+          <span class="meta-label">Client</span>
+          <span class="meta-value">{{ project.client || '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Manager</span>
+          <span class="meta-value">{{ project.managerName || '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Chef de projet</span>
+          <span class="meta-value">{{ project.chefProjetName || '-' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Équipe</span>
+          <span class="meta-value">{{ team?.name || project.teamName || 'Non affectée' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-header">
+        <div>
+          <h3>Lignes de facturation</h3>
+          <p>{{ billingLines.length }} ressource(s)</p>
+        </div>
+
+        <button class="btn btn-light" type="button" (click)="resetJours()">
+          Réinitialiser les jours
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="billing-table">
+          <thead>
+            <tr>
+              <th>Ressource</th>
+              <th>Rôle</th>
+              <th>Profil</th>
+              <th>TJM</th>
+              <th>Nombre de jours</th>
+              <th>Montant HT</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <ng-container *ngIf="managerLines.length > 0">
+              <tr class="section-row">
+                <td colspan="6">Manager</td>
+              </tr>
+              <tr *ngFor="let line of managerLines">
+                <td>
+                  <div class="person-cell">
+                    <div class="person-avatar avatar-manager">{{ line.fullName.charAt(0) }}</div>
+                    <div>
+                      <div class="person-name">{{ line.fullName }}</div>
+                      <div class="person-email">{{ line.email || '-' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="role-badge role-chef">{{ getRoleLabel(line.roleName) }}</span></td>
+                <td>{{ line.profileLibelle || '-' }}</td>
+                <td class="money-cell">{{ formatMoney(line.tjm) }} MAD</td>
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    class="jours-input"
+                    [(ngModel)]="line.nombreJours"
+                    (ngModelChange)="updateLineAmount(line)"
+                    placeholder="0" />
+                </td>
+                <td class="money-cell strong">{{ formatMoney(line.montant) }} MAD</td>
+              </tr>
+            </ng-container>
+
+            <ng-container *ngIf="chefLines.length > 0">
+              <tr class="section-row">
+                <td colspan="6">Chef de projet</td>
+              </tr>
+              <tr *ngFor="let line of chefLines">
+                <td>
+                  <div class="person-cell">
+                    <div class="person-avatar avatar-chef">{{ line.fullName.charAt(0) }}</div>
+                    <div>
+                      <div class="person-name">{{ line.fullName }}</div>
+                      <div class="person-email">{{ line.email || '-' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="role-badge role-manager">{{ getRoleLabel(line.roleName) }}</span></td>
+                <td>{{ line.profileLibelle || '-' }}</td>
+                <td class="money-cell">{{ formatMoney(line.tjm) }} MAD</td>
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    class="jours-input"
+                    [(ngModel)]="line.nombreJours"
+                    (ngModelChange)="updateLineAmount(line)"
+                    placeholder="0" />
+                </td>
+                <td class="money-cell strong">{{ formatMoney(line.montant) }} MAD</td>
+              </tr>
+            </ng-container>
+
+            <ng-container *ngIf="memberLines.length > 0">
+              <tr class="section-row">
+                <td colspan="6">Membres de l'équipe</td>
+              </tr>
+              <tr *ngFor="let line of memberLines">
+                <td>
+                  <div class="person-cell">
+                    <div class="person-avatar avatar-member">{{ line.fullName.charAt(0) }}</div>
+                    <div>
+                      <div class="person-name">{{ line.fullName }}</div>
+                      <div class="person-email">{{ line.email || '-' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="role-badge">{{ getRoleLabel(line.roleName) }}</span></td>
+                <td>{{ line.profileLibelle || '-' }}</td>
+                <td class="money-cell">{{ formatMoney(line.tjm) }} MAD</td>
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    class="jours-input"
+                    [(ngModel)]="line.nombreJours"
+                    (ngModelChange)="updateLineAmount(line)"
+                    placeholder="0" />
+                </td>
+                <td class="money-cell strong">{{ formatMoney(line.montant) }} MAD</td>
+              </tr>
+            </ng-container>
+
+            <tr *ngIf="billingLines.length === 0">
+              <td colspan="6" class="empty-cell">Aucune ressource disponible pour ce projet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card" *ngFor="let item of profileTotals">
+        <span class="summary-label">Total {{ item.profile }}</span>
+        <span class="summary-value">{{ formatMoney(item.total) }} MAD</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-label">Total HT</span>
+        <span class="summary-value">{{ formatMoney(totalGeneral) }} MAD</span>
+      </div>
+
+      <div class="summary-card summary-card-main">
+        <span class="summary-label">Total TTC</span>
+        <span class="summary-value">{{ formatMoney(totalTTC) }} MAD</span>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

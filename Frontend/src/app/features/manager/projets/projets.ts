@@ -1,0 +1,434 @@
+import { Component, computed, signal, inject, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import {
+  ManagerService,
+  ManagerProjectItemDto,
+  ManagerProjectReviewDto,
+  ChefProjetSummary
+} from '../../../core/services/manager.service';
+import { AuthService } from '../../../core/services/auth.service';
+
+interface ReviewProject {
+  id: number;
+  code: string;
+  name: string;
+  client: string;
+  createdAt: string;
+  status: string;
+  managerName: string | null;
+  chefProjetName: string | null;
+  chefProjetId: number | null;
+}
+
+interface ChefProjetOption {
+  id: number;
+  fullName: string;
+  email?: string;
+}
+
+@Component({
+  selector: 'app-review-projets',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DatePipe],
+  templateUrl: './projets.html',
+  styleUrl: './projets.css',
+})
+export class ReviewProjetsComponent implements OnInit {
+  private managerService = inject(ManagerService);
+
+  readonly searchTerm = signal('');
+  readonly currentPage = signal(1);
+  readonly pageSize = 4;
+
+  readonly loading = signal(false);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly projects = signal<ReviewProject[]>([]);
+  readonly chefProjetOptions = signal<ChefProjetOption[]>([]);
+
+  readonly isAssignModalOpen = signal(false);
+  readonly selectedProject = signal<ReviewProject | null>(null);
+
+  readonly isDetailsModalOpen = signal(false);
+  readonly selectedProjectDetails = signal<ReviewProject | null>(null);
+
+  readonly isRejectModalOpen = signal(false);
+  readonly selectedRejectProject = signal<ReviewProject | null>(null);
+   private router = inject(Router);           // ← AJOUTER CETTE LIGNE
+  private authService = inject(AuthService); 
+  readonly countRejectes = computed(
+  () => this.projects().filter((p) => p.status === 'REJETE').length
+);
+
+  rejectComment = '';
+
+  assignForm = {
+    projectId: null as number | null,
+    chefProjetId: null as number | null,
+    comment: '',
+  };
+
+  ngOnInit(): void {
+    this.loadManagerProjects();
+    this.loadChefsProjet();
+  }
+
+  private loadManagerProjects(): void {
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    this.managerService.getManagerProjects().subscribe({
+      next: (data: ManagerProjectItemDto[]) => {
+        const mapped = data.map((project: any) => ({
+          id: project.id,
+          code: this.buildCode(project.projectName),
+          name: project.projectName,
+          client: project.client ?? 'Non défini',
+          createdAt: project.createdAt,
+          status: this.mapBackendStatus(project.status),
+          managerName: project.managerName ?? null,
+          chefProjetName:
+            project.chefProjetName ??
+            project.chefDeProjetName ??
+            project.projectLeaderName ??
+            null,
+          chefProjetId:
+            project.chefProjetId ??
+            project.projectLeaderId ??
+            null,
+        }));
+
+        this.projects.set(mapped);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Erreur chargement projets manager', err);
+        this.errorMessage.set('Erreur lors du chargement des projets.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private loadChefsProjet(): void {
+    this.managerService.getChefsProjetForSelect().subscribe({
+      next: (data: ChefProjetSummary[]) => {
+        const mapped = data.map((chef: any) => ({
+          id: chef.id,
+          fullName:
+            chef.fullName ||
+            [chef.prenom, chef.nom].filter(Boolean).join(' ') ||
+            chef.email ||
+            `Chef #${chef.id}`,
+          email: chef.email
+        }));
+
+        this.chefProjetOptions.set(mapped);
+      },
+      error: (err) => {
+        console.error('Erreur chargement chefs de projet', err);
+      }
+    });
+  }
+
+  readonly filteredProjects = computed(() => {
+    let result = this.projects();
+    const term = this.searchTerm().trim().toLowerCase();
+    const statusFilter = this.selectedStatus().trim();
+
+    // Filtre par statut
+    if (statusFilter) {
+      result = result.filter((p) => p.status === statusFilter);
+    }
+
+    // Filtre par recherche
+    if (term) {
+      result = result.filter((project) =>
+        [
+          project.name,
+          project.client,
+          project.status,
+          project.code,
+          project.chefProjetName ?? ''
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(term)
+      );
+    }
+
+    return result;
+  });
+
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredProjects().length / this.pageSize))
+  );
+
+  readonly paginatedProjects = computed(() => {
+    const page = this.currentPage();
+    const start = (page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.filteredProjects().slice(start, end);
+  });
+
+  readonly selectedStatus = signal('');
+
+  readonly countAValider = computed(
+    () =>
+      this.projects().filter(
+        (p) =>
+          p.status === 'À valider' || p.status === 'En cours de validation'
+      ).length
+  );
+
+  readonly countAssignes = computed(
+    () => this.projects().filter((p) => p.status === 'Assigné').length
+  );
+
+  readonly displayRange = computed(() => {
+    const total = this.filteredProjects().length;
+
+    if (total === 0) {
+      return { start: 0, end: 0, total: 0 };
+    }
+
+    const start = (this.currentPage() - 1) * this.pageSize + 1;
+    const end = Math.min(this.currentPage() * this.pageSize, total);
+
+    return { start, end, total };
+  });
+
+  readonly pageNumbers = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, index) => index + 1)
+  );
+
+  onSearchChange(): void {
+    this.currentPage.set(1);
+  }
+
+  setStatusFilter(status: string): void {
+    this.selectedStatus.set(status);
+    this.currentPage.set(1);
+  }
+
+  isStatusActive(status: string): boolean {
+    return this.selectedStatus() === status;
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  openAssignModal(project: ReviewProject): void {
+    this.selectedProject.set(project);
+    this.assignForm = {
+      projectId: project.id,
+      chefProjetId: project.chefProjetId ?? null,
+      comment: '',
+    };
+    this.isAssignModalOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeAssignModal(): void {
+    this.isAssignModalOpen.set(false);
+    this.selectedProject.set(null);
+    this.assignForm = {
+      projectId: null,
+      chefProjetId: null,
+      comment: '',
+    };
+    this.restoreBodyScrollIfNeeded();
+  }
+
+  openDetailsModal(project: ReviewProject): void {
+    this.selectedProjectDetails.set(project);
+    this.isDetailsModalOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDetailsModal(): void {
+    this.isDetailsModalOpen.set(false);
+    this.selectedProjectDetails.set(null);
+    this.restoreBodyScrollIfNeeded();
+  }
+
+  openRejectModal(project: ReviewProject): void {
+    this.selectedRejectProject.set(project);
+    this.rejectComment = '';
+    this.isRejectModalOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeRejectModal(): void {
+    this.isRejectModalOpen.set(false);
+    this.selectedRejectProject.set(null);
+    this.rejectComment = '';
+    this.restoreBodyScrollIfNeeded();
+  }
+
+  confirmRejectProject(): void {
+    const project = this.selectedRejectProject();
+
+    if (!project?.id || !this.rejectComment.trim()) {
+      return;
+    }
+
+    const payload: ManagerProjectReviewDto = {
+      projectId: project.id,
+      chefProjetId: project.chefProjetId ?? null,
+      commentaire: this.rejectComment.trim(),
+      decision: 'REJETER'
+    };
+
+    this.submitting.set(true);
+
+    this.managerService.reviewProject(payload).subscribe({
+      next: () => {
+        const updatedProjects = this.projects().map(item => {
+          if (item.id === project.id) {
+            return {
+              ...item,
+              status: 'REJETE'
+            };
+          }
+          return item;
+        });
+
+        this.projects.set(updatedProjects);
+        this.submitting.set(false);
+        this.closeRejectModal();
+      },
+      error: (err) => {
+        console.error('Erreur rejet projet', err);
+        this.submitting.set(false);
+        alert(err?.error?.message || 'Erreur lors du rejet du projet.');
+      }
+    });
+  }
+
+  validateAssignment(): void {
+    if (!this.assignForm.projectId || !this.assignForm.chefProjetId) return;
+
+    const selectedChef = this.chefProjetOptions().find(
+      chef => chef.id === this.assignForm.chefProjetId
+    );
+
+    const payload: ManagerProjectReviewDto = {
+      projectId: this.assignForm.projectId,
+      chefProjetId: this.assignForm.chefProjetId,
+      commentaire: this.assignForm.comment?.trim() || 'Projet validé par le manager',
+      decision: 'VALIDER'
+    };
+
+    this.submitting.set(true);
+
+    this.managerService.reviewProject(payload).subscribe({
+      next: () => {
+        const updatedProjects = this.projects().map(project => {
+          if (project.id === this.assignForm.projectId) {
+            return {
+              ...project,
+              status: 'Assigné',
+              chefProjetId: this.assignForm.chefProjetId,
+              chefProjetName: selectedChef?.fullName ?? null
+            };
+          }
+          return project;
+        });
+
+        this.projects.set(updatedProjects);
+
+        const updatedProject =
+          updatedProjects.find(p => p.id === this.assignForm.projectId) ?? null;
+
+        if (updatedProject) {
+          this.selectedProject.set(updatedProject);
+          this.selectedProjectDetails.set(updatedProject);
+        }
+
+        this.submitting.set(false);
+        this.closeAssignModal();
+      },
+      error: (err) => {
+        console.error('Erreur validation assignation', err);
+        this.submitting.set(false);
+        alert(err?.error?.message || "Erreur lors de l'assignation du chef de projet.");
+      }
+    });
+  }
+
+  trackByProjectId(_: number, item: ReviewProject): number {
+    return item.id;
+  }
+
+  private restoreBodyScrollIfNeeded(): void {
+    if (!this.isAssignModalOpen() && !this.isDetailsModalOpen() && !this.isRejectModalOpen()) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  private buildCode(projectName: string): string {
+    if (!projectName) return 'PR';
+    return projectName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word.charAt(0).toUpperCase())
+      .join('') || 'PR';
+  }
+
+  private mapBackendStatus(status: string | null | undefined): string {
+    switch (status) {
+      case 'EN_VALIDATION':
+        return 'En cours de validation';
+      case 'PRE_VALIDE':
+        return 'Assigné';
+      case 'EN_COURS':
+        return 'Assigné';
+      case 'VALIDE':
+        return 'Assigné';
+      case 'CLOTURE':
+        return 'Clôturé';
+      case 'REJETE':
+        return 'REJETE';
+      default:
+        return status || 'À valider';
+    }
+  }
+
+  goToDashboard(): void {
+    const roles = this.authService.getRoles();
+    
+    if (roles.includes('ADMIN')) {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (roles.includes('CHEF_PROJET')) {
+      this.router.navigate(['/chef-projet/dashboard']);
+    } else if (roles.includes('MANAGER')) {
+      this.router.navigate(['/manager/dashboard']);
+    } else if (roles.includes('RESPONSABLE_CONTRAT')) {
+      this.router.navigate(['/responsable-contrat/dashboard']);
+    } else if (roles.includes('MEMBRE_EQUIPE')) {
+      this.router.navigate(['/membre-equipe/dashboard']);
+    } else {
+      this.router.navigate(['/manager/dashboard']);
+    }
+  }
+
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle tâche assignée</title>
+    <style type="text/css">
+        body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #111827; }
+        .wrapper { width: 100%; padding: 24px 0; }
+        .container { max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; overflow: hidden; }
+        .header { background: #7c3aed; color: #ffffff; padding: 24px 28px; }
+        .header h2 { margin: 0; font-size: 24px; line-height: 1.2; }
+        .header p { margin: 10px 0 0; font-size: 14px; color: #d8b4fe; }
+        .content { padding: 28px; }
+        .badge { display: inline-block; background: #f3e8ff; color: #7c3aed; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 999px; margin-bottom: 18px; }
+        .content p { margin: 0 0 16px; line-height: 1.6; }
+        .details { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .details td { padding: 12px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        .details .label { width: 140px; font-weight: 700; color: #1f2937; }
+        .detail-box { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; margin-bottom: 24px; }
+        .detail-box p { margin: 0; }
+        .btn { display: inline-block; background: #4338ca; color: #ffffff; text-decoration: none; padding: 14px 22px; border-radius: 999px; font-weight: 700; }
+        .footer { background: #f8fafc; padding: 20px 28px; color: #6b7280; font-size: 13px; text-align: center; }
+        @media only screen and (max-width: 640px) {
+            .container { margin: 0 12px; }
+            .header, .content, .footer { padding-left: 18px; padding-right: 18px; }
+            .details .label { display: block; width: auto; margin-bottom: 6px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="container">
+        <div class="header">
+            <p class="badge">Nouvelle tâche</p>
+            <h2>Vous avez une nouvelle tâche à traiter</h2>
+        </div>
+        <div class="content">
+            <p>Bonjour <strong th:text="${userName}">Utilisateur</strong>,</p>
+            <p>Une tâche vous a été assignée. Retrouvez les informations essentielles ci-dessous :</p>
+            <table class="details">
+                <tr>
+                    <td class="label">Titre</td>
+                    <td th:text="${taskName}">Nom de la tâche</td>
+                </tr>
+                <tr>
+                    <td class="label">Projet</td>
+                    <td th:text="${projectName}">Nom du projet</td>
+                </tr>
+                <tr>
+                    <td class="label">Échéance</td>
+                    <td th:text="${dueDate}">Date limite</td>
+                </tr>
+                <tr>
+                    <td class="label">Priorité</td>
+                    <td th:text="${priority}">Priorité</td>
+                </tr>
+            </table>
+            <div class="detail-box">
+                <p style="margin-bottom: 10px; font-weight: 700;">Description</p>
+                <p th:text="${description}">Description de la tâche</p>
+            </div>
+            <p>Assigné par : <strong th:text="${assignedByName}">Chef de projet</strong></p>
+        </div>
+        <div class="footer">
+            <p>Cet e-mail est envoyé automatiquement. Merci de ne pas y répondre.</p>
+            <p>© DXC Technology - Plateforme de gestion de projets</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
