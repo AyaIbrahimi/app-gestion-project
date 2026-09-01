@@ -153,7 +153,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=
+            type=sha,prefix=,format=long
 
       - name: Build & Push Backend Docker Image
         uses: docker/build-push-action@v5
@@ -173,7 +173,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=
+            type=sha,prefix=,format=long
 
       - name: Build & Push Frontend Docker Image
         uses: docker/build-push-action@v5
