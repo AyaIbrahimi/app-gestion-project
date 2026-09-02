@@ -8,9 +8,6 @@ Thumbs.db
 # Backend (Maven / Spring Boot)
 Backend/target/
 Backend/${project.build.directory}/
-Backend/.mvn/wrapper/maven-wrapper.jar
-Backend/mvnw
-Backend/mvnw.cmd
 *.log
 
 # Frontend (Node / Angular)
