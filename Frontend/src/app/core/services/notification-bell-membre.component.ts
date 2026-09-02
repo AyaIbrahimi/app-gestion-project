@@ -367,14 +367,14 @@ export class NotificationBellMembreComponent implements OnInit, OnDestroy {
   
   getIcon(type: string): string {
     const icons: {[key: string]: string} = {
-      'TASK_ASSIGNED': '📋',
-      'TASK_UPDATED': '✏️',
-      'TASK_DELETED': '🗑️',
-      'TASK_VALIDATED': '✅',
-      'TASK_REJECTED': '❌',
-      'NEW_MESSAGE': '💬',      // ✅ AJOUT
-        'NEW_FILE_RECEIVED': '📎'
+      'TASK_ASSIGNED': 'Task',
+      'TASK_UPDATED': 'Updated',
+      'TASK_DELETED': 'Removed',
+      'TASK_VALIDATED': 'Validated',
+      'TASK_REJECTED': 'Rejected',
+      'NEW_MESSAGE': 'Message',
+      'NEW_FILE_RECEIVED': 'File'
     };
-    return icons[type] || '🔔';
+    return icons[type] || 'Info';
   }
 }

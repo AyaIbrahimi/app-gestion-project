@@ -367,14 +367,14 @@ export class NotificationBellRcComponent implements OnInit, OnDestroy {
   
   getIcon(type: string): string {
     const icons: {[key: string]: string} = {
-      'PROJECT_VALIDATED_BY_MANAGER': '✅',
-      'PROJECT_REJECTED_BY_MANAGER': '❌',
-      'PROJECT_ASSIGNED_TO_MANAGER': '📁',
-      'TASK_ASSIGNED': '📋',
-      'TASK_VALIDATED': '✅',
-      'TASK_REJECTED': '❌',
-      'NEW_MESSAGE': '💬'
+      'PROJECT_VALIDATED_BY_MANAGER': 'Approved',
+      'PROJECT_REJECTED_BY_MANAGER': 'Rejected',
+      'PROJECT_ASSIGNED_TO_MANAGER': 'Project',
+      'TASK_ASSIGNED': 'Task',
+      'TASK_VALIDATED': 'Validated',
+      'TASK_REJECTED': 'Rejected',
+      'NEW_MESSAGE': 'Message'
     };
-    return icons[type] || '🔔';
+    return icons[type] || 'Info';
   }
 }

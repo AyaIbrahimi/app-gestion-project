@@ -52,7 +52,11 @@
         @for (role of roles(); track role.id) {
           <div class="role-card" [class.selected]="selectedRole()?.id === role.id" (click)="selectRole(role)">
             <div class="role-card-top">
-              <div class="role-icon">🛡️</div>
+              <div class="role-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
               <span class="role-badge" [class.role-badge-active]="role.active" [class.role-badge-inactive]="!role.active">
                 {{ role.active ? 'Actif' : 'Inactif' }}
               </span>
@@ -63,7 +67,15 @@
             </div>
 
             <div class="role-metadata-row">
-              <span class="role-users">👥 {{ countUsersWithRole(role.id) }} utilisateur{{ countUsersWithRole(role.id) > 1 ? 's' : '' }}</span>
+              <span class="role-users">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                {{ countUsersWithRole(role.id) }} utilisateur{{ countUsersWithRole(role.id) > 1 ? 's' : '' }}
+              </span>
             </div>
 
             <div class="role-card-footer">
@@ -143,7 +155,7 @@
           <div class="permission-group">
             <div class="permission-group-header">
               <h4 class="permission-group-title">
-                <span class="group-icon">{{ group.icon }}</span>
+                <span class="group-icon" [innerHTML]="getGroupSvgIcon(group.title)"></span>
                 <span>{{ group.title }}</span>
               </h4>
               <span class="group-count">{{ group.permissions.length }} permission{{ group.permissions.length > 1 ? 's' : '' }}</span>

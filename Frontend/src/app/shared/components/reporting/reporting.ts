@@ -668,7 +668,7 @@ private exportProjectsByManagerPdf(): void {
               <td>${this.escapeHtml(p.chefProjetName || '—')}</td>
               <td>${this.escapeHtml(p.teamName || '—')}</td>
               <td style="font-size:11px;">${p.startDate ? new Date(p.startDate).toLocaleDateString('fr-FR') : '—'}<br>→<br>${p.endDate ? new Date(p.endDate).toLocaleDateString('fr-FR') : '—'}</td>
-              <td class="${p.factured ? 'factured' : 'not-factured'}">${p.factured ? '✓ Facturé' : '✗ Non facturé'}</td>
+              <td class="${p.factured ? 'factured' : 'not-factured'}">${p.factured ? 'Facturé' : 'Non facturé'}</td>
               <td class="members-list">
                 ${p.members.map(m => `<div>• ${this.escapeHtml(m.fullName)}<br><span style="font-size:10px;">${this.escapeHtml(m.profile)}</span></div>`).join('')}
               </td>

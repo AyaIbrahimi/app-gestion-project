@@ -324,7 +324,7 @@ async generatePdf(): Promise<void> {
   doc.setFontSize(16);
 
   try {
-    const logoDataUrl = await this.loadImageAsDataURL('/assets/DXC_logo.png');
+    const logoDataUrl = await this.loadImageAsDataURL('/assets/image.png');
     if (logoDataUrl) {
       doc.addImage(logoDataUrl, 'PNG', margin, 6, 32, 12);
     }

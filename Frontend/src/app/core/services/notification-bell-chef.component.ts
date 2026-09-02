@@ -381,15 +381,15 @@ export class NotificationBellChefComponent implements OnInit, OnDestroy {
   
   getIcon(type: string): string {
     const icons: {[key: string]: string} = {
-      'TASK_PENDING_VALIDATION': '📋',
-      'TASK_VALIDATED': '✅',
-      'TASK_REJECTED': '❌',
-      'PROJECT_ASSIGNED': '📁',
-      'TASK_ASSIGNED_TO_MEMBER': '👥',
-      'ACCOUNT_LOCKED': '🔒',
-      'NEW_MESSAGE': '💬',      // ✅ AJOUT
-        'NEW_FILE_RECEIVED': '📎'
+      'TASK_PENDING_VALIDATION': 'Review',
+      'TASK_VALIDATED': 'Validated',
+      'TASK_REJECTED': 'Rejected',
+      'PROJECT_ASSIGNED': 'Project',
+      'TASK_ASSIGNED_TO_MEMBER': 'Team',
+      'ACCOUNT_LOCKED': 'Security',
+      'NEW_MESSAGE': 'Message',
+      'NEW_FILE_RECEIVED': 'File'
     };
-    return icons[type] || '🔔';
+    return icons[type] || 'Info';
   }
 }

@@ -380,14 +380,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   
   getIcon(type: string): string {
     const icons: {[key: string]: string} = {
-      'ACCOUNT_LOCKED': '🔒',
-      'ACCOUNT_ENABLED': '✅',
-      'TASK_ASSIGNED': '📋',
-      'TASK_VALIDATED': '✅',
-      'TASK_REJECTED': '❌',
-      'BROADCAST': '📢',
-      'TEST': '🧪'
+      'ACCOUNT_LOCKED': 'Security',
+      'ACCOUNT_ENABLED': 'Active',
+      'TASK_ASSIGNED': 'Task',
+      'TASK_VALIDATED': 'Validated',
+      'TASK_REJECTED': 'Rejected',
+      'BROADCAST': 'Notice',
+      'TEST': 'System'
     };
-    return icons[type] || '🔔';
+    return icons[type] || 'Info';
   }
 }

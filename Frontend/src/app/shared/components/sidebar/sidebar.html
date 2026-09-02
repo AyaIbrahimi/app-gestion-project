@@ -118,7 +118,7 @@
     <div class="profile-info">
       <span class="profile-name">{{ currentUser()?.prenom }} {{ currentUser()?.nom }}</span>
       @if (mustChangePassword()) {
-        <span class="profile-email profile-email--warn">⚠ Changement de mot de passe requis</span>
+        <span class="profile-email profile-email--warn">Changement de mot de passe requis</span>
       } @else {
         <span class="profile-email">{{ currentUser()?.email }}</span>
       }
@@ -152,7 +152,7 @@
             <h3 class="profile-modal-title">Mon profil</h3>
             @if (mustChangePassword()) {
               <p class="profile-modal-subtitle profile-modal-subtitle--warn">
-                ⚠ Changement de mot de passe obligatoire
+                Changement de mot de passe obligatoire
               </p>
             } @else {
               <p class="profile-modal-subtitle">{{ currentUser()?.email }}</p>
@@ -312,17 +312,17 @@
                   </svg>
                 } @else {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <path d="M1 War 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 }
               </button>
             </div>
             @if (passwordsMatch) {
-              <span class="pw-match pw-match--ok">✓ Les mots de passe correspondent</span>
+              <span class="pw-match pw-match--ok">Les mots de passe correspondent</span>
             }
             @if (passwordsMismatch) {
-              <span class="pw-match pw-match--err">✗ Les mots de passe ne correspondent pas</span>
+              <span class="pw-match pw-match--err">Les mots de passe ne correspondent pas</span>
             }
           </div>
         }

@@ -113,12 +113,12 @@ riskLoading = signal<Map<number, boolean>>(new Map());
 chefTeamPerformanceItemsPerPage = 5;
 
   kpiData = computed(() => [
-    { title: 'Total Utilisateurs', value: this.totalUsers().toString(), icon: '👥' },
-    { title: 'Utilisateurs Actifs', value: this.activeUsers().toString(), icon: '⚡' },
-    { title: 'Utilisateurs Inactifs', value: this.inactiveUsers().toString(), icon: '🚫' },
-    { title: 'Taux de Validation', value: '94.2%', icon: '✓' },
-    { title: 'Taux de Rejet', value: '5.8%', icon: '✕' },
-    { title: 'Charge Moyenne', value: '72%', icon: '⚙️' }
+    { title: 'Total Utilisateurs', value: this.totalUsers().toString(), icon: 'users' },
+    { title: 'Utilisateurs Actifs', value: this.activeUsers().toString(), icon: 'active' },
+    { title: 'Utilisateurs Inactifs', value: this.inactiveUsers().toString(), icon: 'inactive' },
+    { title: 'Taux de Validation', value: '94.2%', icon: 'check' },
+    { title: 'Taux de Rejet', value: '5.8%', icon: 'cross' },
+    { title: 'Charge Moyenne', value: '72%', icon: 'gear' }
   ]);
 
   monthlyData = [
